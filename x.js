@@ -204,16 +204,18 @@ Mesh = class {
         void main() {
           gl_FragColor = vec4(u_color.rgba);
         }
+
       `)
       let program = createProgram(this.gl, vertexShader, fragmentShader)
       this.program = program
+      this.position_location = gl.getAttribLocation(this.program, 'a_position')
+      this.u_matrix_location = gl.getUniformLocation(this.program, 'u_matrix')
+      this.u_color_location = gl.getUniformLocation(this.program, 'u_color')
     }
 
-    this.position_location = gl.getAttribLocation(this.program, 'a_position')
-    this.u_matrix_location = gl.getUniformLocation(this.program, 'u_matrix')
-    this.u_color_location = gl.getUniformLocation(this.program, 'u_color')
-
     var {buffer_info, idx} = this.geometry
+
+    // console.log(buffer_info)
     this.position_buffer = gl.createBuffer()
     gl.bindBuffer(gl.ARRAY_BUFFER, this.position_buffer)
     // Put geometry data into buffer
@@ -232,6 +234,10 @@ Mesh = class {
      gl.useProgram(this.program)
      // Turn on the position attribute
      gl.enableVertexAttribArray(this.position_location)
+
+     /// ///
+      // g.bindBuffer
+     /// ///
 
      gl.bindBuffer(gl.ARRAY_BUFFER, this.position_buffer)
      // Tell the position attribute how to get data out of positionBuffer (ARRAY_BUFFER)
@@ -443,6 +449,18 @@ BoxGeometry = class {
         ]
       }
       this.faces.push(face)
+    }
+  }
+  applyMatrix (b){
+    var matrix = b
+
+    for (let i = 0, len = this.buffer_info.length; i < len; i += 3){
+      let po = this.buffer_info
+
+      let vector = m4.vectorMultiply([po[i + 0], po[i + 1], po[i + 2], 1], matrix)
+      po[i + 0] = vector[0]
+      po[i + 1] = vector[1]
+      po[i + 2] = vector[2]
     }
   }
 }
@@ -978,5 +996,5 @@ export default {
   CylinderGeometry,
   LatheGeometry,
   MeshBasicMaterial,
-  Mesh
+  Mesh 
 }
